@@ -1,29 +1,55 @@
 package com.syrtin.beautybooking.model;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.MappedCollection;
+import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.Set;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-@Table("procedures")
+@Table("procedure")
 public class Procedure {
+
     @Id
     private final Long id;
-    private final int duration;
-    private final double cost;
 
-    @MappedCollection(idColumn = "procedure_id", keyColumn = "specialist_id")
-    private final Set<Specialist> specialists;
+    private final Integer duration;
 
-    public Procedure(int duration, double cost, Set<Specialist> specialists) {
-        this(null, duration, cost, specialists);
+    private final Integer cost;
+
+    @PersistenceCreator
+    public Procedure(Long id, Integer duration, Integer cost) {
+        this.id = id;
+        this.duration = duration;
+        this.cost = cost;
+    }
+
+    public Procedure(Integer duration, Integer cost) {
+        this(null, duration, cost);
+    }
+
+    public Procedure() {
+        this.id = null;
+        this.duration = null;
+        this.cost = null;
+    }
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public Integer getCost() {
+        return cost;
+    }
+
+    @Override
+    public String toString() {
+        return "Procedure{" +
+                "id=" + id +
+                ", duration=" + duration +
+                ", cost=" + cost +
+                '}';
     }
 }

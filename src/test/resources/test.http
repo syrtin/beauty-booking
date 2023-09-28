@@ -1,0 +1,67 @@
+GET http://localhost:8080/reservations?reservationTime=2022-02-02&specialistId=2 HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+###
+GET http://localhost:8080/specialists/by-procedure/3 HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+
+###
+PUT http://localhost:8080/specialists/3 HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+{
+  "id": 3,
+  "name": "specialist 4",
+  "phone": "89316100000",
+  "procedureIds": [
+    2,
+    3
+  ]
+}
+
+###
+POST http://localhost:8080/specialists HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+{
+  "id": null,
+  "name": "specialist 5",
+  "phone": "89316100000",
+  "procedureIds": [
+    2,
+    3
+  ]
+}
+
+###
+POST http://localhost:8080/clients HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+{
+  "id": null,
+  "name": "client 7",
+  "phone": "89316105000"
+}
+
+###
+GET http://localhost:8080/procedures HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+###
+POST http://localhost:8080/procedures HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+{
+  "id": null,
+  "duration": 120,
+  "cost": 400
+}
+
