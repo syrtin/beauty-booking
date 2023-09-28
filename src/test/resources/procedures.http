@@ -1,0 +1,17 @@
+###
+GET http://localhost:8080/procedures HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+###
+POST http://localhost:8080/procedures HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+{
+  "id": null,
+  "name": "procedure 4",
+  "duration": 140,
+  "cost": 400
+}
+

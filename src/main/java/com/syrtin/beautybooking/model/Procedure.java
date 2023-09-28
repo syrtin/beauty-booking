@@ -1,5 +1,7 @@
 package com.syrtin.beautybooking.model;
 
+import jakarta.annotation.Nonnull;
+import lombok.NonNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.relational.core.mapping.Table;
@@ -10,23 +12,30 @@ public class Procedure {
     @Id
     private final Long id;
 
+    @NonNull
+    private final String name;
+
+    @Nonnull
     private final Integer duration;
 
+    @Nonnull
     private final Integer cost;
 
     @PersistenceCreator
-    public Procedure(Long id, Integer duration, Integer cost) {
+    public Procedure(Long id, String name, Integer duration, Integer cost) {
         this.id = id;
+        this.name = name;
         this.duration = duration;
         this.cost = cost;
     }
 
-    public Procedure(Integer duration, Integer cost) {
-        this(null, duration, cost);
+    public Procedure(String name, Integer duration, Integer cost) {
+        this(null, name, duration, cost);
     }
 
     public Procedure() {
         this.id = null;
+        this.name = null;
         this.duration = null;
         this.cost = null;
     }
@@ -34,6 +43,10 @@ public class Procedure {
 
     public Long getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Integer getDuration() {
@@ -48,6 +61,7 @@ public class Procedure {
     public String toString() {
         return "Procedure{" +
                 "id=" + id +
+                ", name='" + name + '\'' +
                 ", duration=" + duration +
                 ", cost=" + cost +
                 '}';

@@ -7,6 +7,9 @@ import lombok.Data;
 public class ProcedureDto {
     private Long id;
 
+    @NotNull(message = "Name must not be null")
+    private String name;
+
     @NotNull(message = "Duration must not be null")
     private Integer duration;
 

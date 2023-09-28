@@ -6,11 +6,11 @@ values
     (3, 'specialist 3', '89316000000');
 
 -- Populating data for procedures table
-insert into procedure (id, duration, cost)
+insert into procedure (id, name, duration, cost)
 values
-    (1, 60, 100.0),
-    (2, 90, 150.0),
-    (3, 120, 200.0);
+    (1, 'procedure 1', 60, 10000),
+    (2, 'procedure 1', 90, 15000),
+    (3, 'procedure 1', 120, 20000);
 
 -- Populating data for specialists_procedures table
 insert into procedure_specialist (procedure_id, specialist_id)

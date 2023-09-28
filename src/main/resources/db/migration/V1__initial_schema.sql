@@ -8,13 +8,14 @@ create table specialist
 create table procedure
 (
     id       bigserial primary key,
-    duration int    not null,
-    cost     bigint not null
+    name     varchar(255) not null,
+    duration int          not null,
+    cost     bigint       not null
 );
 
 create table procedure_specialist
 (
-    id bigserial PRIMARY KEY,
+    id            bigserial PRIMARY KEY,
     procedure_id  bigint,
     specialist_id bigint,
     unique (procedure_id, specialist_id),

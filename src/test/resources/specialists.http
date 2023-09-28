@@ -1,0 +1,35 @@
+###
+GET http://localhost:8080/specialists/by-procedure/3 HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+
+###
+PUT http://localhost:8080/specialists/3 HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+{
+  "id": 3,
+  "name": "specialist 4",
+  "phone": "89316100000",
+  "procedureIds": [
+    2,
+    3
+  ]
+}
+
+###
+POST http://localhost:8080/specialists HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+{
+  "id": null,
+  "name": "specialist 5",
+  "phone": "89316108000",
+  "procedureIds": [
+    2,
+    3
+  ]
+}
