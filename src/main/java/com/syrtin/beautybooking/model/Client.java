@@ -2,6 +2,7 @@ package com.syrtin.beautybooking.model;
 
 import lombok.NonNull;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Table("client")
@@ -15,6 +16,7 @@ public class Client {
     @NonNull
     private final String phone;
 
+    @PersistenceCreator
     public Client(Long id, String name, String phone) {
         this.id = id;
         this.name = name;
@@ -29,10 +31,6 @@ public class Client {
         this.id = null;
         this.name = null;
         this.phone = null;
-    }
-
-    public Client withId(Long id) {
-        return new Client(id, null, null);
     }
 
     public Long getId() {

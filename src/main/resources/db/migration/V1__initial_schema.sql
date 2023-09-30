@@ -45,7 +45,7 @@ create table reservation
 alter table specialist
     add constraint specialist_name_uk unique (name);
 alter table procedure
-    add constraint procedure_duration_cost_uk unique (duration, cost);
+    add constraint procedure_name_duration_uk unique (name, duration);
 alter table client
     add constraint client_phone_uk unique (phone);
 

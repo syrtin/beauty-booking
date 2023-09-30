@@ -50,6 +50,14 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    public ClientDto getClientByPhone(String phone) {
+        log.info("Getting client by phone: {}", phone);
+        var client = clientRepository.findByPhone(phone)
+                .orElseThrow(() -> new DataNotFoundException(String.format("Client with phone %s not found", phone)));
+        return clientMapper.toDto(client);
+    }
+
+    @Override
     public ClientDto updateClient(Long id, ClientDto clientDTO) {
         log.info("Updating client with id: {}", id);
         checkIfClientExist(id);

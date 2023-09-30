@@ -37,6 +37,12 @@ public class ClientController {
         return ResponseEntity.ok(client);
     }
 
+    @GetMapping("/phone/{phone}")
+    public ResponseEntity<ClientDto> getClientByPhone(@PathVariable String phone) {
+        ClientDto client = clientService.getClientByPhone(phone);
+        return ResponseEntity.ok(client);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ClientDto> updateClient(@PathVariable Long id, @Valid @RequestBody ClientDto clientDTO) {
         ClientDto updatedClient = clientService.updateClient(id, clientDTO);
