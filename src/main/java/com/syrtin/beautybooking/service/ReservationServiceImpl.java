@@ -6,6 +6,7 @@ import com.syrtin.beautybooking.exception.OutOfSaloonWorkingHoursException;
 import com.syrtin.beautybooking.exception.ScheduleConflictException;
 import com.syrtin.beautybooking.mapper.ReservationMapper;
 import com.syrtin.beautybooking.model.Reservation;
+import com.syrtin.beautybooking.repository.ProcedureRepository;
 import com.syrtin.beautybooking.repository.ReservationRepository;
 import com.syrtin.beautybooking.sessionmanager.TransactionManager;
 import lombok.extern.slf4j.Slf4j;
@@ -20,14 +21,16 @@ import java.util.stream.Collectors;
 @Service
 public class ReservationServiceImpl implements ReservationService {
     private final ReservationRepository reservationRepository;
+    private final ProcedureRepository procedureRepository;
     private final ReservationMapper reservationMapper;
     private final TransactionManager transactionManager;
 
 
     public ReservationServiceImpl(ReservationRepository reservationRepository,
-                                  ReservationMapper reservationMapper,
+                                  ProcedureRepository procedureRepository, ReservationMapper reservationMapper,
                                   TransactionManager transactionManager) {
         this.reservationRepository = reservationRepository;
+        this.procedureRepository = procedureRepository;
         this.reservationMapper = reservationMapper;
         this.transactionManager = transactionManager;
     }
@@ -84,7 +87,10 @@ public class ReservationServiceImpl implements ReservationService {
         return transactionManager.doInTransaction(() -> {
             var reservationDate = reservation.getReservationTime().toLocalDate();
             var startTime = reservation.getReservationTime();
-            var endTime = reservation.getReservationTime().plusMinutes(reservation.getProcedure().getDuration());
+            var procedure = procedureRepository.findById(reservation.getProcedure().getId())
+                    .orElseThrow(() -> new DataNotFoundException("Procedure not found with id: " + reservation.getProcedure().getId()));
+            var procedureDuration = procedure.getDuration();
+            var endTime = reservation.getReservationTime().plusMinutes(procedureDuration);
 
             if (startTime.toLocalTime().isBefore(LocalTime.of(10, 0))
                     || endTime.toLocalTime().isAfter(LocalTime.of(22, 0))) {
