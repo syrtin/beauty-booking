@@ -35,6 +35,12 @@ public class Specialist {
         this(null, name, phone);
     }
 
+    public Specialist() {
+        this.id = null;
+        this.name = null;
+        this.phone = null;
+    }
+
     /**
      * The aggregate root should take care of whatever logic is necessary to add a specialist.
      */
@@ -44,8 +50,7 @@ public class Specialist {
     }
 
     public void removeProcedure(Procedure procedure) {
-        final ProcedureRef ref = new ProcedureRef(null, AggregateReference.to(procedure.getId()));
-        procedureSet.remove(ref);
+        procedureSet.removeIf(ref -> ref.getProcedureId().getId().equals(procedure.getId()));
     }
 
     public Long getId() {

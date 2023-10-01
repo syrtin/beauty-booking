@@ -34,11 +34,29 @@ public class SpecialistServiceImpl implements SpecialistService {
         log.info("Creating specialist: {}", specialistDTO);
 
         Specialist specialist = specialistMapper.toEntity(specialistDTO);
-        specialist = specialistRepository.save(specialist);
 
-        log.info("Created specialist: {}", specialist);
+        specialist.setProcedureSet(validateAndGetProcedureRefSet(specialistDTO));
 
-        return specialistMapper.toDTO(specialist);
+        var createdSpecialist = specialistRepository.save(specialist);
+
+        log.info("Created specialist: {}", createdSpecialist);
+
+        return specialistMapper.toDTO(createdSpecialist);
+    }
+
+    public SpecialistDto updateSpecialist(Long id, SpecialistDto specialistDTO) {
+        log.info("Updating specialist with id: {}, data: {}", id, specialistDTO);
+
+        checkIfSpecialistExist(id);
+        var updatedSpecialist = new Specialist(id, specialistDTO.getName(), specialistDTO.getPhone());
+
+        updatedSpecialist.setProcedureSet(validateAndGetProcedureRefSet(specialistDTO));
+
+        var savedSpecialist = specialistRepository.save(updatedSpecialist);
+
+        log.info("Updated specialist: {}", savedSpecialist);
+
+        return specialistMapper.toDTO(savedSpecialist);
     }
 
     public SpecialistDto getSpecialist(Long id) {
@@ -56,40 +74,13 @@ public class SpecialistServiceImpl implements SpecialistService {
         log.info("Getting all specialists");
 
         List<Specialist> specialists = (List<Specialist>) specialistRepository.findAll();
-        List<SpecialistDto> specialistDtos = specialists.stream()
+        List<SpecialistDto> specialistDtoList = specialists.stream()
                 .map(specialistMapper::toDTO)
                 .collect(Collectors.toList());
 
         log.info("Got {} specialists", specialists.size());
 
-        return specialistDtos;
-    }
-
-    public SpecialistDto updateSpecialist(Long id, SpecialistDto specialistDTO) {
-        log.info("Updating specialist with id: {}, data: {}", id, specialistDTO);
-
-        checkIfSpecialistExist(id);
-        var updatedSpecialist = new Specialist(id, specialistDTO.getName(), specialistDTO.getPhone());
-
-        Set<ProcedureRef> procedureSet = new HashSet<>();
-        if (specialistDTO.getProcedureIds() != null) {
-            for (Long procedureId : specialistDTO.getProcedureIds()) {
-                if (!procedureRepository.existsById(procedureId)) {
-                    throw new DataNotFoundException("Procedure not found with id: " + id);
-                }
-                ProcedureRef procedureRef = new ProcedureRef();
-                procedureRef.setProcedureId(AggregateReference.to(procedureId));
-                procedureSet.add(procedureRef);
-            }
-        }
-
-        updatedSpecialist.setProcedureSet(procedureSet);
-
-        var savedSpecialist = specialistRepository.save(updatedSpecialist);
-
-        log.info("Updated specialist: {}", savedSpecialist);
-
-        return specialistMapper.toDTO(savedSpecialist);
+        return specialistDtoList;
     }
 
     public void deleteSpecialist(Long id) {
@@ -151,5 +142,20 @@ public class SpecialistServiceImpl implements SpecialistService {
         if (!specialistRepository.existsById(id)) {
             throw new DataNotFoundException(String.format("Reservation with id %s does not exist.", id));
         }
+    }
+
+    private Set<ProcedureRef> validateAndGetProcedureRefSet(SpecialistDto specialistDTO) {
+        Set<ProcedureRef> procedureSet = new HashSet<>();
+        if (specialistDTO.getProcedureIds() != null) {
+            for (Long procedureId : specialistDTO.getProcedureIds()) {
+                if (!procedureRepository.existsById(procedureId)) {
+                    throw new DataNotFoundException("Procedure not found with id: " + procedureId);
+                }
+                ProcedureRef procedureRef = new ProcedureRef();
+                procedureRef.setProcedureId(AggregateReference.to(procedureId));
+                procedureSet.add(procedureRef);
+            }
+        }
+        return procedureSet;
     }
 }

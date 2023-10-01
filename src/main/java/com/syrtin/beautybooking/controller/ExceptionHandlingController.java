@@ -1,6 +1,7 @@
 package com.syrtin.beautybooking.controller;
 
 import com.syrtin.beautybooking.exception.DataNotFoundException;
+import com.syrtin.beautybooking.exception.OutOfSaloonWorkingHoursException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,12 @@ public class ExceptionHandlingController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleDataNotFoundException(DataNotFoundException ex) {
         return new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(OutOfSaloonWorkingHoursException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleDataNotFoundException(OutOfSaloonWorkingHoursException ex) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
     @ExceptionHandler(DbActionExecutionException.class)
