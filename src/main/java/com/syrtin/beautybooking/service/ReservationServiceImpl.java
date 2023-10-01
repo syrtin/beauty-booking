@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -24,6 +26,7 @@ public class ReservationServiceImpl implements ReservationService {
     private final ProcedureRepository procedureRepository;
     private final ReservationMapper reservationMapper;
     private final TransactionManager transactionManager;
+    private final Lock reservationLock = new ReentrantLock();
 
 
     public ReservationServiceImpl(ReservationRepository reservationRepository,
@@ -73,7 +76,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     private List<Reservation> findReservationsByDateAndSpecialist(LocalDate reservationDate, Long specialistId) {
-        return reservationRepository.findByReservationTimeAndSpecialist(reservationDate.atStartOfDay(),
+        return reservationRepository.findByReservationInterfalAndSpecialist(reservationDate.atStartOfDay(),
                 reservationDate.atTime(23, 59), specialistId);
     }
 
@@ -97,21 +100,38 @@ public class ReservationServiceImpl implements ReservationService {
                 throw new OutOfSaloonWorkingHoursException("Reservation gap is out of saloon working hours");
             }
 
+            reservationLock.lock();
+
             var existingReservations = findReservationsByDateAndSpecialist(
                     reservationDate, reservation.getSpecialist().getId());
 
-            for (Reservation currentReservation : existingReservations) {
-                if (currentReservation.getId().equals(reservation.getId())) {
-                    continue; // Skip checking for the current reservation being updated
-                }
-                var currentReservationEndTime = currentReservation.getReservationTime()
-                        .plusMinutes(currentReservation.getProcedure().getDuration());
-                if (startTime.isBefore(currentReservationEndTime) && endTime.isAfter(currentReservation.getReservationTime())) {
-                    throw new ScheduleConflictException("Reservation cannot be saved due to schedule conflict.");
-                }
-            }
+            try {
+                for (Reservation currentReservation : existingReservations) {
+                    if (currentReservation.getId().equals(reservation.getId())) {
+                        continue; // Skip checking for the current reservation being updated
+                    }
 
-            return reservationRepository.save(reservation);
+                    var currentProcedure = procedureRepository.findById(currentReservation.getProcedure().getId())
+                            .orElseThrow(() -> new DataNotFoundException("Procedure not found with id: " + reservation.getProcedure().getId()));
+                    var currentProcedureDuration = currentProcedure.getDuration();
+
+                    var currentReservationEndTime = currentReservation.getReservationTime()
+                            .plusMinutes(currentProcedureDuration);
+                    if (startTime.isBefore(currentReservationEndTime) && endTime.isAfter(currentReservation.getReservationTime())) {
+                        throw new ScheduleConflictException("Reservation cannot be saved due to schedule conflict.");
+                    }
+                }
+
+                reservationRepository.save(reservation.getReservationTime(),
+                        reservation.getClient().getId(),
+                        reservation.getSpecialist().getId(),
+                        reservation.getProcedure().getId());
+                return reservationRepository.findByReservationTimeAndSpecialist(reservation.getReservationTime(),
+                        reservation.getSpecialist().getId())
+                        .orElseThrow(() -> new DataNotFoundException("Verification error of reservation saving."));
+            } finally {
+                reservationLock.unlock();
+            }
         });
     }
 }

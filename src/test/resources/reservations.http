@@ -5,7 +5,7 @@ Content-Type: application/json
 
 {
   "id": null,
-  "reservationTime": "2025-02-02T10:00:00",
+  "reservationTime": "2025-02-24T10:00:00",
   "client": {
     "id": 1,
     "name": null,
@@ -42,26 +42,24 @@ DELETE http://localhost:8080/reservations/1
 PUT http://localhost:8080/reservations/1
 Content-Type: application/json
 
-[
-  {
-    "id": null,
-    "reservationTime": "2025-03-02T11:00:00",
-    "client": {
-      "id": 1,
-      "name": null,
-      "phone": null
-    },
-    "specialist": {
-      "id": 2,
-      "name": null,
-      "phone": null,
-      "procedureIds": null
-    },
-    "procedure": {
-      "id": 3,
-      "name": null,
-      "duration": null,
-      "cost": null
-    }
+{
+  "id": null,
+  "reservationTime": "2025-03-02T11:00:00",
+  "client": {
+    "id": 1,
+    "name": null,
+    "phone": null
+  },
+  "specialist": {
+    "id": 2,
+    "name": null,
+    "phone": null,
+    "procedureIds": null
+  },
+  "procedure": {
+    "id": 3,
+    "name": null,
+    "duration": null,
+    "cost": null
   }
-]
+}
