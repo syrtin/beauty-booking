@@ -1,0 +1,31 @@
+### 1. Запрос для метода createDayOff():
+POST http://localhost:8080/day-off
+Content-Type: application/json
+
+{
+  "dayOffDate": "2023-10-10",
+  "reason": "Vacation",
+  "specialistId": "1"
+}
+
+### 2. Запрос для метода getAllDayOffs():
+GET http://localhost:8080/day-off
+
+### 3. Запрос для метода getDayOffById():
+GET http://localhost:8080/day-off/1
+
+### 4. Запрос для метода updateDayOff():
+PUT http://localhost:8080/day-off/1
+Content-Type: application/json
+
+{
+  "dayOffDate": "2023-10-11",
+  "reason": "Sick leave",
+  "specialistId": "1"
+}
+
+### 5. Запрос для метода deleteDayOff():
+DELETE http://localhost:8080/day-off/1
+
+### 6. Запрос для проверки метода deleteDayOff():
+GET http://localhost:8080/day-off/1

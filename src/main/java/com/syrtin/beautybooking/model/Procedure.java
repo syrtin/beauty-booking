@@ -34,10 +34,7 @@ public class Procedure {
     }
 
     public Procedure() {
-        this.id = null;
-        this.name = null;
-        this.duration = null;
-        this.cost = null;
+        this(null, null, null, null);
     }
 
 

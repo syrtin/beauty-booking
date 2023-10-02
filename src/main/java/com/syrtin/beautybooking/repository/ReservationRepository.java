@@ -68,4 +68,13 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
               @Param("clientId") Long clientId,
               @Param("specialistId") Long specialistId,
               @Param("procedureId") Long procedureId);
+
+    @Modifying
+    @Query("UPDATE reservation SET reservation_time = :reservationTime, client_id = :clientId, " +
+            "specialist_id = :specialistId, procedure_id = :procedureId WHERE id = :id")
+    void update(@Param("id") Long id,
+                @Param("reservationTime") LocalDateTime reservationTime,
+                @Param("clientId") Long clientId,
+                @Param("specialistId") Long specialistId,
+                @Param("procedureId") Long procedureId);
 }

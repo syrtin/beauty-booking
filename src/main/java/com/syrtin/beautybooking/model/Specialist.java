@@ -36,13 +36,11 @@ public class Specialist {
     }
 
     public Specialist() {
-        this.id = null;
-        this.name = null;
-        this.phone = null;
+        this(null, null, null);
     }
 
     /**
-     * The aggregate root should take care of whatever logic is necessary to add a specialist.
+     * The aggregate root should take care of whatever logic is necessary to add a procedure.
      */
     public void addProcedure(Procedure procedure) {
         final ProcedureRef ref = new ProcedureRef(null, AggregateReference.to(procedure.getId()));

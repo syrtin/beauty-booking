@@ -42,11 +42,7 @@ public class Reservation {
     }
 
     public Reservation() {
-        this.id = null;
-        this.reservationTime = null;
-        this.client = null;
-        this.specialist = null;
-        this.procedure = null;
+        this(null, null, null, null, null);
     }
 
     public Long getId() {

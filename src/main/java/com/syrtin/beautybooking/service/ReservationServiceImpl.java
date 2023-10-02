@@ -3,9 +3,11 @@ package com.syrtin.beautybooking.service;
 import com.syrtin.beautybooking.dto.ReservationDto;
 import com.syrtin.beautybooking.exception.DataNotFoundException;
 import com.syrtin.beautybooking.exception.OutOfSaloonWorkingHoursException;
+import com.syrtin.beautybooking.exception.OutOfSpecialistWorkingDayException;
 import com.syrtin.beautybooking.exception.ScheduleConflictException;
 import com.syrtin.beautybooking.mapper.ReservationMapper;
 import com.syrtin.beautybooking.model.Reservation;
+import com.syrtin.beautybooking.repository.DayOffRepository;
 import com.syrtin.beautybooking.repository.ProcedureRepository;
 import com.syrtin.beautybooking.repository.ReservationRepository;
 import com.syrtin.beautybooking.sessionmanager.TransactionManager;
@@ -24,16 +26,18 @@ import java.util.stream.Collectors;
 public class ReservationServiceImpl implements ReservationService {
     private final ReservationRepository reservationRepository;
     private final ProcedureRepository procedureRepository;
+    private final DayOffRepository dayOffRepository;
     private final ReservationMapper reservationMapper;
     private final TransactionManager transactionManager;
     private final Lock reservationLock = new ReentrantLock();
 
 
     public ReservationServiceImpl(ReservationRepository reservationRepository,
-                                  ProcedureRepository procedureRepository, ReservationMapper reservationMapper,
+                                  ProcedureRepository procedureRepository, DayOffRepository dayOffRepository, ReservationMapper reservationMapper,
                                   TransactionManager transactionManager) {
         this.reservationRepository = reservationRepository;
         this.procedureRepository = procedureRepository;
+        this.dayOffRepository = dayOffRepository;
         this.reservationMapper = reservationMapper;
         this.transactionManager = transactionManager;
     }
@@ -90,11 +94,22 @@ public class ReservationServiceImpl implements ReservationService {
         return transactionManager.doInTransaction(() -> {
             var reservationDate = reservation.getReservationTime().toLocalDate();
             var startTime = reservation.getReservationTime();
+            // procedure exist check
             var procedure = procedureRepository.findById(reservation.getProcedure().getId())
-                    .orElseThrow(() -> new DataNotFoundException("Procedure not found with id: " + reservation.getProcedure().getId()));
+                    .orElseThrow(() -> new DataNotFoundException(String.format("Procedure not found with id: %s",
+                            reservation.getProcedure().getId())));
             var procedureDuration = procedure.getDuration();
             var endTime = reservation.getReservationTime().plusMinutes(procedureDuration);
 
+            // specialist available check todo - протестировать
+            var dayOffOptional = dayOffRepository.findDayOffByDayOffDateAndSpecialistId(reservationDate,
+                    reservation.getSpecialist().getId());
+            if (dayOffOptional.isPresent()) {
+                throw new OutOfSpecialistWorkingDayException(String.format("Specialist %s doesn't work at date %s",
+                        reservation.getSpecialist().getName(), reservationDate.toString()));
+            }
+
+            // schedule check
             if (startTime.toLocalTime().isBefore(LocalTime.of(10, 0))
                     || endTime.toLocalTime().isAfter(LocalTime.of(22, 0))) {
                 throw new OutOfSaloonWorkingHoursException("Reservation gap is out of saloon working hours");
@@ -102,10 +117,9 @@ public class ReservationServiceImpl implements ReservationService {
 
             reservationLock.lock();
 
-            var existingReservations = findReservationsByDateAndSpecialist(
-                    reservationDate, reservation.getSpecialist().getId());
-
             try {
+                var existingReservations = findReservationsByDateAndSpecialist(
+                        reservationDate, reservation.getSpecialist().getId());
                 for (Reservation currentReservation : existingReservations) {
                     if (currentReservation.getId().equals(reservation.getId())) {
                         continue; // Skip checking for the current reservation being updated
@@ -122,16 +136,25 @@ public class ReservationServiceImpl implements ReservationService {
                     }
                 }
 
-                reservationRepository.save(reservation.getReservationTime(),
+                if (reservation.getId() != null) {
+                    reservationRepository.update(reservation.getId(),
+                            reservation.getReservationTime(),
+                            reservation.getClient().getId(),
+                            reservation.getSpecialist().getId(),
+                            reservation.getProcedure().getId());
+                } else reservationRepository.save(reservation.getReservationTime(),
                         reservation.getClient().getId(),
                         reservation.getSpecialist().getId(),
                         reservation.getProcedure().getId());
-                return reservationRepository.findByReservationTimeAndSpecialist(reservation.getReservationTime(),
-                        reservation.getSpecialist().getId())
+                var checkSavedSpecialist = reservationRepository.findByReservationTimeAndSpecialist(reservation.getReservationTime(),
+                                reservation.getSpecialist().getId())
                         .orElseThrow(() -> new DataNotFoundException("Verification error of reservation saving."));
+                checkSavedSpecialist.getSpecialist().setProcedureSet(null);
+                return checkSavedSpecialist;
             } finally {
                 reservationLock.unlock();
             }
+
         });
     }
 }

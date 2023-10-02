@@ -28,9 +28,7 @@ public class Client {
     }
 
     public Client() {
-        this.id = null;
-        this.name = null;
-        this.phone = null;
+        this(null, null, null);
     }
 
     public Long getId() {

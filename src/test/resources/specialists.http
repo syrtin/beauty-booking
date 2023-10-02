@@ -20,7 +20,7 @@ GET http://localhost:8080/specialists
 ###
 
 ## 3. Запрос для метода getSpecialist():
-GET http://localhost:8080/specialists/11
+GET http://localhost:8080/specialists/1
 
 ###
 

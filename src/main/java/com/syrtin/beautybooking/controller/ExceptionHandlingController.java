@@ -2,6 +2,7 @@ package com.syrtin.beautybooking.controller;
 
 import com.syrtin.beautybooking.exception.DataNotFoundException;
 import com.syrtin.beautybooking.exception.OutOfSaloonWorkingHoursException;
+import com.syrtin.beautybooking.exception.ScheduleConflictException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.http.HttpStatus;
@@ -42,7 +43,14 @@ public class ExceptionHandlingController {
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
+    @ExceptionHandler(ScheduleConflictException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleDataNotFoundException(ScheduleConflictException ex) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
+
     @ExceptionHandler(DbActionExecutionException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlePhoneDuplicateKeyException(DbActionExecutionException ex) {
         var message = ex.getCause().getMessage();
         return new ErrorResponse(HttpStatus.NOT_ACCEPTABLE.value(), message);

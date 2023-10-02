@@ -15,11 +15,21 @@ create table procedure
 
 create table procedure_specialist
 (
-    id            bigserial PRIMARY KEY,
+    id            bigserial primary key,
     procedure_id  bigint,
     specialist_id bigint,
     unique (procedure_id, specialist_id),
     foreign key (procedure_id) references procedure (id),
+    foreign key (specialist_id) references specialist (id)
+);
+
+create table day_off
+(
+    id            bigserial primary key,
+    day_off_date  date         not null,
+    reason        varchar(255) not null,
+    specialist_id bigint,
+    unique (day_off_date, specialist_id),
     foreign key (specialist_id) references specialist (id)
 );
 

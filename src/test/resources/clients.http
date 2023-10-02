@@ -1,4 +1,4 @@
-## 1. Запрос для метода createClient():
+### 1. Запрос для метода createClient():
 POST http://localhost:8080/clients
 Content-Type: application/json
 
@@ -8,24 +8,16 @@ Content-Type: application/json
   "phone": "+79816106599"
 }
 
-###
-
-## 2. Запрос для метода getAllClients():
+### 2. Запрос для метода getAllClients():
 GET http://localhost:8080/clients
 
-###
-
-## 3. Запрос для метода getClientById():
+### 3. Запрос для метода getClientById():
 GET http://localhost:8080/clients/4
 
-###
-
-## 4. Запрос для метода getClientByPhone():
+### 4. Запрос для метода getClientByPhone():
 GET http://localhost:8080/clients/phone/+79816106599
 
-###
-
-## 5. Запрос для метода updateClient():
+### 5. Запрос для метода updateClient():
 PUT http://localhost:8080/clients/4
 Content-Type: application/json
 
@@ -35,12 +27,8 @@ Content-Type: application/json
   "phone": "+79817106599"
 }
 
-###
-
-## 6. Запрос для метода deleteClient():
+### 6. Запрос для метода deleteClient():
 DELETE http://localhost:8080/clients/4
 
-###
-
-## 7. Запрос для проверки метода deleteClient():
+### 7. Запрос для проверки метода deleteClient():
 GET http://localhost:8080/clients/4
