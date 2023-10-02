@@ -77,4 +77,8 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
                 @Param("clientId") Long clientId,
                 @Param("specialistId") Long specialistId,
                 @Param("procedureId") Long procedureId);
+
+    @Modifying
+    @Query("DELETE FROM Reservation r WHERE r.id = :reservationId")
+    void deleteReservationWithoutCascade(@Param("reservationId") Long reservationId);
 }

@@ -10,6 +10,7 @@ import com.syrtin.beautybooking.model.Reservation;
 import com.syrtin.beautybooking.repository.DayOffRepository;
 import com.syrtin.beautybooking.repository.ProcedureRepository;
 import com.syrtin.beautybooking.repository.ReservationRepository;
+import com.syrtin.beautybooking.repository.SpecialistRepository;
 import com.syrtin.beautybooking.sessionmanager.TransactionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,17 +28,19 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationRepository reservationRepository;
     private final ProcedureRepository procedureRepository;
     private final DayOffRepository dayOffRepository;
+    private final SpecialistRepository specialistRepository;
     private final ReservationMapper reservationMapper;
     private final TransactionManager transactionManager;
     private final Lock reservationLock = new ReentrantLock();
 
 
     public ReservationServiceImpl(ReservationRepository reservationRepository,
-                                  ProcedureRepository procedureRepository, DayOffRepository dayOffRepository, ReservationMapper reservationMapper,
+                                  ProcedureRepository procedureRepository, DayOffRepository dayOffRepository, SpecialistRepository specialistRepository, ReservationMapper reservationMapper,
                                   TransactionManager transactionManager) {
         this.reservationRepository = reservationRepository;
         this.procedureRepository = procedureRepository;
         this.dayOffRepository = dayOffRepository;
+        this.specialistRepository = specialistRepository;
         this.reservationMapper = reservationMapper;
         this.transactionManager = transactionManager;
     }
@@ -76,7 +79,7 @@ public class ReservationServiceImpl implements ReservationService {
     public void deleteReservation(Long id) {
         log.info("Deleting reservation with id {}", id);
         checkIfReservationExist(id);
-        reservationRepository.deleteById(id);
+        reservationRepository.deleteReservationWithoutCascade(id);
     }
 
     private List<Reservation> findReservationsByDateAndSpecialist(LocalDate reservationDate, Long specialistId) {
@@ -101,12 +104,15 @@ public class ReservationServiceImpl implements ReservationService {
             var procedureDuration = procedure.getDuration();
             var endTime = reservation.getReservationTime().plusMinutes(procedureDuration);
 
-            // specialist available check todo - протестировать
+            // specialist available check
             var dayOffOptional = dayOffRepository.findDayOffByDayOffDateAndSpecialistId(reservationDate,
                     reservation.getSpecialist().getId());
             if (dayOffOptional.isPresent()) {
+                var specialist = specialistRepository.findById(reservation.getSpecialist().getId())
+                        .orElseThrow(() -> new DataNotFoundException(String.format("There is not specialist with id %s",
+                                reservation.getSpecialist().getId())));
                 throw new OutOfSpecialistWorkingDayException(String.format("Specialist %s doesn't work at date %s",
-                        reservation.getSpecialist().getName(), reservationDate.toString()));
+                        specialist.getName(), reservationDate.toString()));
             }
 
             // schedule check

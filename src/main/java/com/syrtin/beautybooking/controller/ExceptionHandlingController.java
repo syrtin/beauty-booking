@@ -2,6 +2,7 @@ package com.syrtin.beautybooking.controller;
 
 import com.syrtin.beautybooking.exception.DataNotFoundException;
 import com.syrtin.beautybooking.exception.OutOfSaloonWorkingHoursException;
+import com.syrtin.beautybooking.exception.OutOfSpecialistWorkingDayException;
 import com.syrtin.beautybooking.exception.ScheduleConflictException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
@@ -39,19 +40,25 @@ public class ExceptionHandlingController {
 
     @ExceptionHandler(OutOfSaloonWorkingHoursException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleDataNotFoundException(OutOfSaloonWorkingHoursException ex) {
+    public ErrorResponse handleOutOfSaloonWorkingHoursException(OutOfSaloonWorkingHoursException ex) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(OutOfSpecialistWorkingDayException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleSpecialistWorkingDayException(OutOfSpecialistWorkingDayException ex) {
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
     @ExceptionHandler(ScheduleConflictException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleDataNotFoundException(ScheduleConflictException ex) {
+    public ErrorResponse handleScheduleConflictException(ScheduleConflictException ex) {
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
     @ExceptionHandler(DbActionExecutionException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handlePhoneDuplicateKeyException(DbActionExecutionException ex) {
+    public ErrorResponse handleDbActionExecutionException(DbActionExecutionException ex) {
         var message = ex.getCause().getMessage();
         return new ErrorResponse(HttpStatus.NOT_ACCEPTABLE.value(), message);
     }

@@ -2,10 +2,9 @@
 POST http://localhost:8080/reservations
 Content-Type: application/json
 
-
 {
   "id": null,
-  "reservationTime": "2025-04-24T10:00:00",
+  "reservationTime": "2030-01-01T10:00:00",
   "client": {
     "id": 1,
     "name": null,
@@ -25,7 +24,6 @@ Content-Type: application/json
   }
 }
 
-
 ###
 
 ## 2. Запрос для метода findReservationsByDateAndSpecialist():
@@ -39,7 +37,7 @@ DELETE http://localhost:8080/reservations/1
 ###
 
 ## 4. Запрос для метода updateReservation():
-PUT http://localhost:8080/reservations/7
+PUT http://localhost:8080/reservations/4
 Content-Type: application/json
 
 {
