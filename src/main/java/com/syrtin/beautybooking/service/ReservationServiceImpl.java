@@ -12,6 +12,7 @@ import com.syrtin.beautybooking.repository.ProcedureRepository;
 import com.syrtin.beautybooking.repository.ReservationRepository;
 import com.syrtin.beautybooking.repository.SpecialistRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -24,6 +25,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class ReservationServiceImpl implements ReservationService {
+    @Value("${company.opening-time}")
+    private String openingTime;
+
+    @Value("${company.closing-time}")
+    private String closingTime;
+
     private final ReservationRepository reservationRepository;
     private final ProcedureRepository procedureRepository;
     private final DayOffRepository dayOffRepository;
@@ -95,6 +102,7 @@ public class ReservationServiceImpl implements ReservationService {
     private Reservation saveReservation(Reservation reservation) {
         var reservationDate = reservation.getReservationTime().toLocalDate();
         var startTime = reservation.getReservationTime();
+
         // procedure exist check
         var procedure = procedureRepository.findById(reservation.getProcedure().getId())
                 .orElseThrow(() -> new DataNotFoundException(String.format("Procedure not found with id: %s",
@@ -114,8 +122,8 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         // schedule check
-        if (startTime.toLocalTime().isBefore(LocalTime.of(10, 0))
-                || endTime.toLocalTime().isAfter(LocalTime.of(22, 0))) {
+        if (startTime.toLocalTime().isBefore(LocalTime.parse(openingTime))
+                || endTime.toLocalTime().isAfter(LocalTime.parse(closingTime))) {
             throw new OutOfSaloonWorkingHoursException("Reservation gap is out of saloon working hours");
         }
 
