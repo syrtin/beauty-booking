@@ -11,7 +11,7 @@ Content-Type: application/json
     "phone": null
   },
   "specialist": {
-    "id": 1,
+    "id": 2,
     "name": null,
     "phone": null,
     "procedureIds": null
@@ -55,7 +55,7 @@ Content-Type: application/json
     "procedureIds": null
   },
   "procedure": {
-    "id": 3,
+    "id": 1,
     "name": null,
     "duration": null,
     "cost": null
