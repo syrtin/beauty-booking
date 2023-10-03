@@ -4,10 +4,12 @@ import com.syrtin.beautybooking.model.Client;
 import com.syrtin.beautybooking.model.Procedure;
 import com.syrtin.beautybooking.model.Reservation;
 import com.syrtin.beautybooking.model.Specialist;
+import lombok.experimental.UtilityClass;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+@UtilityClass
 public class ExtractorUtils {
 
     public static Reservation extract(ResultSet rs) throws SQLException {

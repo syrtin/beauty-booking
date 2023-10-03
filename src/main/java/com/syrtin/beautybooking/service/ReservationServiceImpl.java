@@ -11,7 +11,6 @@ import com.syrtin.beautybooking.repository.DayOffRepository;
 import com.syrtin.beautybooking.repository.ProcedureRepository;
 import com.syrtin.beautybooking.repository.ReservationRepository;
 import com.syrtin.beautybooking.repository.SpecialistRepository;
-import com.syrtin.beautybooking.sessionmanager.TransactionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -30,19 +29,19 @@ public class ReservationServiceImpl implements ReservationService {
     private final DayOffRepository dayOffRepository;
     private final SpecialistRepository specialistRepository;
     private final ReservationMapper reservationMapper;
-    private final TransactionManager transactionManager;
     private final Lock reservationLock = new ReentrantLock();
 
 
     public ReservationServiceImpl(ReservationRepository reservationRepository,
-                                  ProcedureRepository procedureRepository, DayOffRepository dayOffRepository, SpecialistRepository specialistRepository, ReservationMapper reservationMapper,
-                                  TransactionManager transactionManager) {
+                                  ProcedureRepository procedureRepository,
+                                  DayOffRepository dayOffRepository,
+                                  SpecialistRepository specialistRepository,
+                                  ReservationMapper reservationMapper) {
         this.reservationRepository = reservationRepository;
         this.procedureRepository = procedureRepository;
         this.dayOffRepository = dayOffRepository;
         this.specialistRepository = specialistRepository;
         this.reservationMapper = reservationMapper;
-        this.transactionManager = transactionManager;
     }
 
     @Override
@@ -94,73 +93,70 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     private Reservation saveReservation(Reservation reservation) {
-        return transactionManager.doInTransaction(() -> {
-            var reservationDate = reservation.getReservationTime().toLocalDate();
-            var startTime = reservation.getReservationTime();
-            // procedure exist check
-            var procedure = procedureRepository.findById(reservation.getProcedure().getId())
-                    .orElseThrow(() -> new DataNotFoundException(String.format("Procedure not found with id: %s",
-                            reservation.getProcedure().getId())));
-            var procedureDuration = procedure.getDuration();
-            var endTime = reservation.getReservationTime().plusMinutes(procedureDuration);
+        var reservationDate = reservation.getReservationTime().toLocalDate();
+        var startTime = reservation.getReservationTime();
+        // procedure exist check
+        var procedure = procedureRepository.findById(reservation.getProcedure().getId())
+                .orElseThrow(() -> new DataNotFoundException(String.format("Procedure not found with id: %s",
+                        reservation.getProcedure().getId())));
+        var procedureDuration = procedure.getDuration();
+        var endTime = reservation.getReservationTime().plusMinutes(procedureDuration);
 
-            // specialist available check
-            var dayOffOptional = dayOffRepository.findDayOffByDayOffDateAndSpecialistId(reservationDate,
-                    reservation.getSpecialist().getId());
-            if (dayOffOptional.isPresent()) {
-                var specialist = specialistRepository.findById(reservation.getSpecialist().getId())
-                        .orElseThrow(() -> new DataNotFoundException(String.format("There is not specialist with id %s",
-                                reservation.getSpecialist().getId())));
-                throw new OutOfSpecialistWorkingDayException(String.format("Specialist %s doesn't work at date %s",
-                        specialist.getName(), reservationDate.toString()));
-            }
+        // specialist available check
+        var dayOffOptional = dayOffRepository.findDayOffByDayOffDateAndSpecialistId(reservationDate,
+                reservation.getSpecialist().getId());
+        if (dayOffOptional.isPresent()) {
+            var specialist = specialistRepository.findById(reservation.getSpecialist().getId())
+                    .orElseThrow(() -> new DataNotFoundException(String.format("There is not specialist with id %s",
+                            reservation.getSpecialist().getId())));
+            throw new OutOfSpecialistWorkingDayException(String.format("Specialist %s doesn't work at date %s",
+                    specialist.getName(), reservationDate.toString()));
+        }
 
-            // schedule check
-            if (startTime.toLocalTime().isBefore(LocalTime.of(10, 0))
-                    || endTime.toLocalTime().isAfter(LocalTime.of(22, 0))) {
-                throw new OutOfSaloonWorkingHoursException("Reservation gap is out of saloon working hours");
-            }
+        // schedule check
+        if (startTime.toLocalTime().isBefore(LocalTime.of(10, 0))
+                || endTime.toLocalTime().isAfter(LocalTime.of(22, 0))) {
+            throw new OutOfSaloonWorkingHoursException("Reservation gap is out of saloon working hours");
+        }
 
-            reservationLock.lock();
+        reservationLock.lock();
 
-            try {
-                var existingReservations = findReservationsByDateAndSpecialist(
-                        reservationDate, reservation.getSpecialist().getId());
-                for (Reservation currentReservation : existingReservations) {
-                    if (currentReservation.getId().equals(reservation.getId())) {
-                        continue; // Skip checking for the current reservation being updated
-                    }
-
-                    var currentProcedure = procedureRepository.findById(currentReservation.getProcedure().getId())
-                            .orElseThrow(() -> new DataNotFoundException("Procedure not found with id: " + reservation.getProcedure().getId()));
-                    var currentProcedureDuration = currentProcedure.getDuration();
-
-                    var currentReservationEndTime = currentReservation.getReservationTime()
-                            .plusMinutes(currentProcedureDuration);
-                    if (startTime.isBefore(currentReservationEndTime) && endTime.isAfter(currentReservation.getReservationTime())) {
-                        throw new ScheduleConflictException("Reservation cannot be saved due to schedule conflict.");
-                    }
+        try {
+            var existingReservations = findReservationsByDateAndSpecialist(
+                    reservationDate, reservation.getSpecialist().getId());
+            for (Reservation currentReservation : existingReservations) {
+                if (currentReservation.getId().equals(reservation.getId())) {
+                    continue; // Skip checking for the current reservation being updated
                 }
 
-                if (reservation.getId() != null) {
-                    reservationRepository.update(reservation.getId(),
-                            reservation.getReservationTime(),
-                            reservation.getClient().getId(),
-                            reservation.getSpecialist().getId(),
-                            reservation.getProcedure().getId());
-                } else reservationRepository.save(reservation.getReservationTime(),
+                var currentProcedure = procedureRepository.findById(currentReservation.getProcedure().getId())
+                        .orElseThrow(() -> new DataNotFoundException("Procedure not found with id: " + reservation.getProcedure().getId()));
+                var currentProcedureDuration = currentProcedure.getDuration();
+
+                var currentReservationEndTime = currentReservation.getReservationTime()
+                        .plusMinutes(currentProcedureDuration);
+                if (startTime.isBefore(currentReservationEndTime) && endTime.isAfter(currentReservation.getReservationTime())) {
+                    throw new ScheduleConflictException("Reservation cannot be saved due to schedule conflict.");
+                }
+            }
+
+            if (reservation.getId() != null) {
+                reservationRepository.update(reservation.getId(),
+                        reservation.getReservationTime(),
                         reservation.getClient().getId(),
                         reservation.getSpecialist().getId(),
                         reservation.getProcedure().getId());
-                var checkSavedSpecialist = reservationRepository.findByReservationTimeAndSpecialist(reservation.getReservationTime(),
-                                reservation.getSpecialist().getId())
-                        .orElseThrow(() -> new DataNotFoundException("Verification error of reservation saving."));
-                checkSavedSpecialist.getSpecialist().setProcedureSet(null);
-                return checkSavedSpecialist;
-            } finally {
-                reservationLock.unlock();
-            }
-
-        });
+            } else reservationRepository.save(reservation.getReservationTime(),
+                    reservation.getClient().getId(),
+                    reservation.getSpecialist().getId(),
+                    reservation.getProcedure().getId());
+            var checkSavedSpecialist = reservationRepository.findByReservationTimeAndSpecialist(reservation.getReservationTime(),
+                            reservation.getSpecialist().getId())
+                    .orElseThrow(() -> new DataNotFoundException("Verification error of reservation saving."));
+            checkSavedSpecialist.getSpecialist().setProcedureSet(null);
+            return checkSavedSpecialist;
+        } finally {
+            reservationLock.unlock();
+        }
     }
 }
