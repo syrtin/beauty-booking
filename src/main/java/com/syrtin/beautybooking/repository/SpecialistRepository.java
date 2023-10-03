@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface SpecialistRepository extends CrudRepository<Specialist, Long> {
 
-    @Query("SELECT s.* FROM specialist s JOIN procedure_specialist sp ON s.id = sp.specialist_id WHERE sp.procedure_id = :procedureId")
+    @Query("select s.* from specialist s join procedure_specialist sp on s.id = sp.specialist_id where sp.procedure_id = :procedureId")
     List<Specialist> findAllByProcedure(@Param("procedureId") Long procedureId);
 
 }

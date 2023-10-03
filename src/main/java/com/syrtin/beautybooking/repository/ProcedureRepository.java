@@ -11,10 +11,10 @@ import java.util.List;
 @Repository
 public interface ProcedureRepository extends CrudRepository<Procedure, Long> {
 
-    @Query("SELECT * FROM procedure")
+    @Query("select * from procedure")
     List<Procedure> findAll();
 
     @Modifying
-    @Query("DELETE FROM procedure WHERE id = :id")
+    @Query("DELETE from procedure where id = :id")
     void deleteById(Long id);
 }
