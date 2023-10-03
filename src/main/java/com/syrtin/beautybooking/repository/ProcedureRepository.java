@@ -13,8 +13,4 @@ public interface ProcedureRepository extends CrudRepository<Procedure, Long> {
 
     @Query("select * from procedure")
     List<Procedure> findAll();
-
-    @Modifying
-    @Query("DELETE from procedure where id = :id")
-    void deleteById(Long id);
 }

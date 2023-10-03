@@ -19,7 +19,7 @@ create table procedure_specialist
     procedure_id  bigint,
     specialist_id bigint,
     unique (procedure_id, specialist_id),
-    foreign key (procedure_id) references procedure (id),
+    foreign key (procedure_id) references procedure (id) on delete cascade,
     foreign key (specialist_id) references specialist (id)
 );
 
@@ -30,7 +30,7 @@ create table day_off
     reason        varchar(255) not null,
     specialist_id bigint,
     unique (day_off_date, specialist_id),
-    foreign key (specialist_id) references specialist (id)
+    foreign key (specialist_id) references specialist (id) on delete cascade
 );
 
 create table client
@@ -47,9 +47,9 @@ create table reservation
     client_id        bigint,
     specialist_id    bigint,
     procedure_id     bigint,
-    foreign key (client_id) references client (id),
-    foreign key (specialist_id) references specialist (id),
-    foreign key (procedure_id) references procedure (id)
+    foreign key (client_id) references client (id) on delete cascade,
+    foreign key (specialist_id) references specialist (id) on delete cascade,
+    foreign key (procedure_id) references procedure (id) on delete cascade
 );
 
 alter table specialist
@@ -58,10 +58,3 @@ alter table procedure
     add constraint procedure_name_duration_uk unique (name, duration);
 alter table client
     add constraint client_phone_uk unique (phone);
-
-alter table reservation
-    add constraint reservations_fk_client foreign key (client_id) references client (id);
-alter table reservation
-    add constraint reservations_fk_specialist foreign key (specialist_id) references specialist (id);
-alter table reservation
-    add constraint reservations_fk_procedure foreign key (procedure_id) references procedure (id);

@@ -35,7 +35,7 @@ Content-Type: application/json
 ###
 
 ## 5. Запрос для метода deleteProcedure():
-DELETE http://localhost:8080/procedures/4
+DELETE http://localhost:8080/procedures/2
 
 ###
 

@@ -7,10 +7,7 @@ import com.syrtin.beautybooking.exception.OutOfSpecialistWorkingDayException;
 import com.syrtin.beautybooking.exception.ScheduleConflictException;
 import com.syrtin.beautybooking.mapper.ReservationMapper;
 import com.syrtin.beautybooking.model.Reservation;
-import com.syrtin.beautybooking.repository.DayOffRepository;
-import com.syrtin.beautybooking.repository.ProcedureRepository;
-import com.syrtin.beautybooking.repository.ReservationRepository;
-import com.syrtin.beautybooking.repository.SpecialistRepository;
+import com.syrtin.beautybooking.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -33,19 +30,21 @@ public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ProcedureRepository procedureRepository;
-    private final DayOffRepository dayOffRepository;
+    private final ClientRepository clientRepository;
     private final SpecialistRepository specialistRepository;
+    private final DayOffRepository dayOffRepository;
     private final ReservationMapper reservationMapper;
     private final Lock reservationLock = new ReentrantLock();
 
 
     public ReservationServiceImpl(ReservationRepository reservationRepository,
                                   ProcedureRepository procedureRepository,
-                                  DayOffRepository dayOffRepository,
+                                  ClientRepository clientRepository, DayOffRepository dayOffRepository,
                                   SpecialistRepository specialistRepository,
                                   ReservationMapper reservationMapper) {
         this.reservationRepository = reservationRepository;
         this.procedureRepository = procedureRepository;
+        this.clientRepository = clientRepository;
         this.dayOffRepository = dayOffRepository;
         this.specialistRepository = specialistRepository;
         this.reservationMapper = reservationMapper;
@@ -103,10 +102,21 @@ public class ReservationServiceImpl implements ReservationService {
         var reservationDate = reservation.getReservationTime().toLocalDate();
         var startTime = reservation.getReservationTime();
 
+        // client exist check
+        if (!clientRepository.existsById(reservation.getClient().getId())) {
+            throw new DataNotFoundException(String.format("Client with id %s does not exist.", reservation.getClient().getId()));
+        }
+
+        // procedure exist check
+        var specialist = specialistRepository.findById(reservation.getSpecialist().getId())
+                .orElseThrow(() -> new DataNotFoundException(String.format("There is not specialist with id %s",
+                        reservation.getSpecialist().getId())));
+
         // procedure exist check
         var procedure = procedureRepository.findById(reservation.getProcedure().getId())
                 .orElseThrow(() -> new DataNotFoundException(String.format("Procedure not found with id: %s",
                         reservation.getProcedure().getId())));
+
         var procedureDuration = procedure.getDuration();
         var endTime = reservation.getReservationTime().plusMinutes(procedureDuration);
 
@@ -114,9 +124,7 @@ public class ReservationServiceImpl implements ReservationService {
         var dayOffOptional = dayOffRepository.findDayOffByDayOffDateAndSpecialistId(reservationDate,
                 reservation.getSpecialist().getId());
         if (dayOffOptional.isPresent()) {
-            var specialist = specialistRepository.findById(reservation.getSpecialist().getId())
-                    .orElseThrow(() -> new DataNotFoundException(String.format("There is not specialist with id %s",
-                            reservation.getSpecialist().getId())));
+
             throw new OutOfSpecialistWorkingDayException(String.format("Specialist %s doesn't work at date %s",
                     specialist.getName(), reservationDate.toString()));
         }
