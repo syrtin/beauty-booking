@@ -5,7 +5,7 @@ Content-Type: application/json
 {
   "id": null,
   "name": "specialist 4",
-  "phone": "89316108113",
+  "phone": "+79316108113",
   "procedureIds": [
     2,
     3
@@ -36,7 +36,7 @@ Content-Type: application/json
 {
   "id": null,
   "name": "specialist 5",
-  "phone": "89316100011",
+  "phone": "+79316100011",
   "procedureIds": [
     1
   ]
@@ -49,7 +49,7 @@ POST http://localhost:8080/specialists/4/procedures/2
 ###
 
 ## 7. Запрос для метода removeProcedure():
-DELETE http://localhost:8080/specialists/11/procedures/2
+DELETE http://localhost:8080/specialists/4/procedures/2
 
 ###
 
