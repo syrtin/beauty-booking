@@ -1,5 +1,6 @@
 package com.syrtin.beautybooking.model;
 
+import lombok.NonNull;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
@@ -16,12 +17,14 @@ public class Specialist {
     @Id
     private final Long id;
 
+    @NonNull
     private final String name;
 
+    @NonNull
     private final String phone;
 
-    @MappedCollection(idColumn = "specialist_id", keyColumn = "procedure_id")
     @Setter
+    @MappedCollection(idColumn = "specialist_id", keyColumn = "procedure_id")
     private Set<ProcedureRef> procedureSet = new HashSet<>();
 
     @PersistenceCreator

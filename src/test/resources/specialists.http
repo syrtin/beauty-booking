@@ -4,8 +4,8 @@ Content-Type: application/json
 
 {
   "id": null,
-  "name": "specialist 12",
-  "phone": "89316108112",
+  "name": "specialist 4",
+  "phone": "89316108113",
   "procedureIds": [
     2,
     3
@@ -20,40 +20,39 @@ GET http://localhost:8080/specialists
 ###
 
 ## 3. Запрос для метода getSpecialist():
-GET http://localhost:8080/specialists/1
+GET http://localhost:8080/specialists/4
 
 ###
 
 ## 4. Запрос для метода getAllSpecialistsByProcedure():
-GET http://localhost:8080/specialists/by-procedure/12
+GET http://localhost:8080/specialists/by-procedure/2
 
 ###
 
 ## 5. Запрос для метода updateSpecialist():
-PUT http://localhost:8080/specialists/11
+PUT http://localhost:8080/specialists/4
 Content-Type: application/json
 
 {
   "id": null,
-  "name": "specialist 12",
+  "name": "specialist 5",
   "phone": "89316100011",
   "procedureIds": [
-    1,
-    2
+    1
   ]
 }
 
 ###
 
-## 6. Запрос для метода deleteSpecialist():
-DELETE http://localhost:8080/specialists/1
-
+## 6. Запрос для метода addProcedure():
+POST http://localhost:8080/specialists/4/procedures/2
 ###
 
-## 7. Запрос для метода addProcedure():
-POST http://localhost:8080/specialists/11/procedures/3
-
-###
-
-## 8. Запрос для метода removeProcedure():
+## 7. Запрос для метода removeProcedure():
 DELETE http://localhost:8080/specialists/11/procedures/2
+
+###
+
+## 8. Запрос для метода deleteSpecialist():
+DELETE http://localhost:8080/specialists/4
+

@@ -34,10 +34,11 @@ public class SpecialistServiceImpl implements SpecialistService {
         log.info("Creating specialist: {}", specialistDTO);
 
         Specialist specialist = specialistMapper.toEntity(specialistDTO);
-
         specialist.setProcedureSet(validateAndGetProcedureRefSet(specialistDTO));
+        var savedspecialist = specialistRepository.save(specialist);
 
-        var createdSpecialist = specialistRepository.save(specialist);
+        var createdSpecialist = specialistRepository.findById(savedspecialist.getId())
+                .orElseThrow(() -> new DataNotFoundException("Specialist not found with id: " + specialist.getId()));
 
         log.info("Created specialist: {}", createdSpecialist);
 
