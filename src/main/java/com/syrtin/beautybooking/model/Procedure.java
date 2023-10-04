@@ -1,29 +1,66 @@
 package com.syrtin.beautybooking.model;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.annotation.Nonnull;
+import lombok.NonNull;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.MappedCollection;
+import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.Set;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-@Table("procedures")
+@Table("procedure")
 public class Procedure {
+
     @Id
     private final Long id;
-    private final int duration;
-    private final double cost;
 
-    @MappedCollection(idColumn = "procedure_id", keyColumn = "specialist_id")
-    private final Set<Specialist> specialists;
+    @NonNull
+    private final String name;
 
-    public Procedure(int duration, double cost, Set<Specialist> specialists) {
-        this(null, duration, cost, specialists);
+    @Nonnull
+    private final Integer duration;
+
+    @Nonnull
+    private final Integer cost;
+
+    @PersistenceCreator
+    public Procedure(Long id, String name, Integer duration, Integer cost) {
+        this.id = id;
+        this.name = name;
+        this.duration = duration;
+        this.cost = cost;
+    }
+
+    public Procedure(String name, Integer duration, Integer cost) {
+        this(null, name, duration, cost);
+    }
+
+    public Procedure() {
+        this(null, null, null, null);
+    }
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public Integer getCost() {
+        return cost;
+    }
+
+    @Override
+    public String toString() {
+        return "Procedure{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", duration=" + duration +
+                ", cost=" + cost +
+                '}';
     }
 }

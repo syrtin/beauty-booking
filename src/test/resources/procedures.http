@@ -1,0 +1,43 @@
+## 1. Запрос для метода getAllProcedures():
+GET http://localhost:8080/procedures
+
+###
+
+## 2. Запрос для метода getProcedureById():
+GET http://localhost:8080/procedures/3
+
+###
+
+## 3. Запрос для метода createProcedure():
+POST http://localhost:8080/procedures HTTP/1.1
+Content-Type: application/json
+
+{
+  "id": null,
+  "name": "procedure 4",
+  "duration": 150,
+  "cost": 400
+}
+
+###
+
+## 4. Запрос для метода updateProcedure()
+PUT http://localhost:8080/procedures/4
+Content-Type: application/json
+
+{
+  "id": null,
+  "name": "updated procedure",
+  "description": "updated description",
+  "duration": 90
+}
+
+###
+
+## 5. Запрос для метода deleteProcedure():
+DELETE http://localhost:8080/procedures/2
+
+###
+
+## 6. Запрос для проверки метода deleteProcedure()
+GET http://localhost:8080/procedures/4

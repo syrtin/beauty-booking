@@ -1,0 +1,63 @@
+## 1. Запрос для метода createReservation():
+POST http://localhost:8080/reservations
+Content-Type: application/json
+
+{
+  "id": null,
+  "reservationTime": "2030-01-15T10:00:00",
+  "client": {
+    "id": 1,
+    "name": null,
+    "phone": null
+  },
+  "specialist": {
+    "id": 2,
+    "name": null,
+    "phone": null,
+    "procedureIds": null
+  },
+  "procedure": {
+    "id": 3,
+    "name": null,
+    "duration": null,
+    "cost": null
+  }
+}
+
+###
+
+## 2. Запрос для метода findReservationsByDateAndSpecialist():
+GET http://localhost:8080/reservations?reservationTime=2022-02-02&specialistId=2
+
+###
+
+## 3. Запрос для метода deleteReservation():
+DELETE http://localhost:8080/reservations/4
+
+###
+
+## 4. Запрос для метода updateReservation():
+PUT http://localhost:8080/reservations/3
+Content-Type: application/json
+
+{
+  "id": null,
+  "reservationTime": "2025-04-03T11:00:00",
+  "client": {
+    "id": 1,
+    "name": null,
+    "phone": null
+  },
+  "specialist": {
+    "id": 1,
+    "name": null,
+    "phone": null,
+    "procedureIds": null
+  },
+  "procedure": {
+    "id": 1,
+    "name": null,
+    "duration": null,
+    "cost": null
+  }
+}
